@@ -25,7 +25,7 @@
             --overlay-bg: rgba(10, 25, 47, 0.85); /* Darker overlay */
             --overlay-text: #64ffda;
 
-            /* Tetromino Colors (Adjusted slightly for dark theme if needed) */
+            /* Tetromino Colors */
             --color-I: #00ffff; /* Cyan */
             --color-O: #ffff00; /* Yellow */
             --color-T: #ae00ff; /* Purple */
@@ -38,13 +38,25 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            flex-direction: column; /* Stack title above game */
+            align-items: center; /* Center content horizontally */
             background-color: var(--bg-color);
             color: var(--text-color);
-            padding-top: 20px;
+            padding: 20px; /* Add padding around everything */
             min-height: 100vh;
             box-sizing: border-box;
+        }
+
+        /* Title moved outside container */
+        .main-title {
+            color: var(--header-color);
+            margin-top: 0;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 1px;
+            font-size: 3em; /* Larger main title */
+            text-shadow: 0 0 8px var(--header-color);
         }
 
         .game-container {
@@ -58,13 +70,18 @@
             flex-wrap: wrap;
             justify-content: center;
             border: 1px solid var(--cell-border);
+            max-width: 1000px; /* Optional: constrain max width */
+            width: 100%; /* Take available width */
+            box-sizing: border-box;
         }
 
         .player-area, .ai-area {
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 220px;
+            flex-basis: 242px; /* Base width */
+            flex-grow: 1; /* Allow growing */
+            min-width: 242px; /* Ensure minimum space */
         }
 
         .controls-area {
@@ -78,31 +95,41 @@
             min-width: 160px;
             height: fit-content;
             border: 1px solid var(--cell-border);
+            flex-shrink: 0; /* Prevent controls from shrinking too much */
         }
 
-        h1, h2 {
+        h2 { /* Sub-section titles */
             color: var(--header-color);
             margin-top: 0;
-            margin-bottom: 20px;
+            margin-bottom: 15px; /* Reduced margin */
             text-align: center;
             font-weight: 600;
             letter-spacing: 1px;
+            font-size: 1.5em;
         }
-        h1 {
-             font-size: 2.5em; /* Larger main title */
-             text-shadow: 0 0 5px var(--header-color);
-        }
-         h2 {
-             font-size: 1.5em;
-         }
-         h3 {
+         h3 { /* Preview/Hold titles */
              color: var(--header-color);
              font-size: 1.1em;
              margin-bottom: 5px;
+             margin-top: 0; /* Reset top margin */
+         }
+
+        /* Player Preview/Hold moved above grid */
+        .player-area .preview-hold-container {
+             display: flex;
+             justify-content: space-around;
+             width: 100%;
+             margin-bottom: 15px; /* Space between previews and grid */
+        }
+         .preview-box, .hold-box {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
          }
 
         .grid-container {
             position: relative;
+            margin-bottom: 15px; /* Space between grid and info */
         }
 
         .grid {
@@ -142,7 +169,7 @@
 
 
         .info-area {
-            margin-top: 20px;
+            /* No longer needs top margin as grid provides space */
             text-align: center;
             width: 100%;
         }
@@ -157,17 +184,13 @@
             font-weight: bold;
         }
 
-        .preview-hold-container {
+        /* AI Preview Container */
+        .ai-area .preview-hold-container {
              display: flex;
-             justify-content: space-around; /* Space out Next and Hold */
+             justify-content: center; /* Center the single Next box */
              width: 100%;
-             margin-top: 10px;
+             margin-bottom: 15px; /* Space before grid */
         }
-         .preview-box, .hold-box {
-             display: flex;
-             flex-direction: column;
-             align-items: center;
-         }
 
 
         .next-piece-area, .hold-piece-area {
@@ -280,15 +303,16 @@
         }
 
         /* Responsive adjustments */
-        @media (max-width: 768px) {
+        @media (max-width: 860px) { /* Adjust breakpoint */
             .game-container {
                 flex-direction: column;
                 align-items: center;
                 gap: 25px;
                 padding: 15px;
+                width: 95%; /* Limit width on smaller screens */
             }
             .controls-area {
-                order: -1;
+                order: -1; /* Controls on top */
                 width: 95%;
                 flex-direction: row;
                 flex-wrap: wrap;
@@ -296,16 +320,45 @@
             }
              .player-area, .ai-area {
                 width: 95%;
+                 min-width: unset; /* Remove min-width */
+                 flex-basis: auto; /* Reset basis */
             }
-            h1 { font-size: 2em; }
+            .main-title { font-size: 2em; }
             h2 { font-size: 1.3em; }
         }
+         @media (max-width: 480px) { /* Further adjustments for very small screens */
+              .grid {
+                  width: 220px; /* Keep grid size fixed for now */
+                  height: 440px;
+              }
+              .controls-area button, .difficulty-select select {
+                  width: 100px; /* Smaller controls */
+                  padding: 10px 5px;
+                  font-size: 0.9em;
+              }
+              .preview-hold-container {
+                   /* Could stack previews vertically if needed */
+                  /* flex-direction: column; align-items: center; gap: 10px; */
+              }
+              .next-piece-area, .hold-piece-area {
+                  width: 66px; /* 3 * 22px */
+                  height: 66px;
+                  grid-template-columns: repeat(3, 22px);
+                  grid-template-rows: repeat(3, 22px);
+              }
+              .next-piece-area .grid-cell, .hold-piece-area .grid-cell {
+                   width: 22px; height: 22px;
+              }
+              h3 { font-size: 1em; }
+         }
+
     </style>
 </head>
 <body>
 
+<h1 class="main-title">Pork Tetris</h1>
+
 <div class="game-container">
-    <h1>Pork Tetris</h1>
 
     <div class="controls-area">
         <h2>Controls</h2>
@@ -330,6 +383,16 @@
 
     <div class="player-area">
         <h2>Player</h2>
+        <div class="preview-hold-container">
+            <div class="hold-box">
+                <h3>Hold (C)</h3>
+                <div id="player-hold-piece" class="hold-piece-area"></div>
+            </div>
+             <div class="preview-box">
+                <h3>Next</h3>
+                <div id="player-next-piece" class="next-piece-area"></div>
+             </div>
+        </div>
         <div class="grid-container">
             <div id="player-grid" class="grid"></div>
             <div id="player-message" class="message-overlay">Game Over!</div>
@@ -338,22 +401,18 @@
             <p>Score: <span id="player-score">0</span></p>
             <p>Level: <span id="player-level">1</span></p>
             <p>Lines: <span id="player-lines">0</span></p>
-            <div class="preview-hold-container">
-                <div class="hold-box">
-                    <h3>Hold (C)</h3>
-                    <div id="player-hold-piece" class="hold-piece-area"></div>
-                </div>
-                 <div class="preview-box">
-                    <h3>Next</h3>
-                    <div id="player-next-piece" class="next-piece-area"></div>
-                 </div>
             </div>
-        </div>
     </div>
 
     <div class="ai-area">
         <h2>AI (<span id="ai-difficulty-display">Intermediate</span>)</h2>
-         <div class="grid-container">
+         <div class="preview-hold-container">
+             <div class="preview-box">
+                 <h3>Next</h3>
+                <div id="ai-next-piece" class="next-piece-area"></div>
+             </div>
+             </div>
+        <div class="grid-container">
             <div id="ai-grid" class="grid"></div>
             <div id="ai-message" class="message-overlay">AI Lost!</div>
         </div>
@@ -361,12 +420,6 @@
             <p>Score: <span id="ai-score">0</span></p>
             <p>Level: <span id="ai-level">1</span></p>
             <p>Lines: <span id="ai-lines">0</span></p>
-             <div class="preview-hold-container">
-                 <div class="preview-box">
-                     <h3>Next</h3>
-                    <div id="ai-next-piece" class="next-piece-area"></div>
-                 </div>
-            </div>
         </div>
     </div>
 </div>
@@ -375,8 +428,13 @@
     // --- Constants ---
     const GRID_WIDTH = 10;
     const GRID_HEIGHT = 20;
-    const NEXT_GRID_SIZE = 4; // For the next/hold piece preview area
-    const CELL_SIZE = 22; // Match CSS
+    const NEXT_GRID_SIZE = 4; // Size of preview grids (4x4 logical)
+    const CELL_SIZE = 22; // Pixel size of each cell (matches CSS)
+
+    // Movement Acceleration (DAS/ARR) Constants
+    const DAS_DELAY = 160; // ms delay before auto-repeat starts
+    const ARR_INTERVAL = 50; // ms interval for auto-repeat (horizontal)
+    const SOFT_DROP_INTERVAL = 50; // ms interval for soft drop repeat
 
     // Tetromino shapes and colors
     const TETROMINOES = {
@@ -390,7 +448,7 @@
     };
     const TETROMINO_KEYS = Object.keys(TETROMINOES);
 
-    // Scoring
+    // Scoring & Leveling
     const SCORE_POINTS = { 1: 100, 2: 300, 3: 500, 4: 800 };
     const LINES_PER_LEVEL = 10;
 
@@ -405,8 +463,8 @@
     let playerBoard, aiBoard;
     let playerPiece, aiPiece;
     let playerNextPiece, aiNextPiece;
-    let playerHeldPiece = null; // Added for Hold feature
-    let playerCanHold = true;  // Added for Hold feature
+    let playerHeldPiece = null;
+    let playerCanHold = true;
     let playerScore, aiScore;
     let playerLevel, aiLevel;
     let playerLines, aiLines;
@@ -417,12 +475,19 @@
     let pieceBag = [];
     let sharedPieceQueue = [];
 
+    // DAS/ARR State Variables
+    let dasTimeoutLeft = null, dasTimeoutRight = null;
+    let arrIntervalLeft = null, arrIntervalRight = null;
+    let softDropInterval = null;
+    let isLeftDown = false, isRightDown = false, isDownDown = false;
+
+
     // --- DOM Elements ---
     const playerGridElement = document.getElementById('player-grid');
     const aiGridElement = document.getElementById('ai-grid');
     const playerNextPieceElement = document.getElementById('player-next-piece');
     const aiNextPieceElement = document.getElementById('ai-next-piece');
-    const playerHoldPieceElement = document.getElementById('player-hold-piece'); // Added
+    const playerHoldPieceElement = document.getElementById('player-hold-piece');
     const playerScoreElement = document.getElementById('player-score');
     const aiScoreElement = document.getElementById('ai-score');
     const playerLevelElement = document.getElementById('player-level');
@@ -437,8 +502,10 @@
     const playerMessageElement = document.getElementById('player-message');
     const aiMessageElement = document.getElementById('ai-message');
 
+
     // --- Utility Functions ---
 
+    // Creates an empty grid matrix
     function createMatrix(width, height) {
         const matrix = [];
         while (height--) {
@@ -447,37 +514,43 @@
         return matrix;
     }
 
+    // Creates the grid cells in the DOM
     function createDOMGrid(element, width, height) {
-        element.innerHTML = '';
+        element.innerHTML = ''; // Clear previous grid
+        const cellCount = width * height;
+        // Optimize grid creation slightly
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < cellCount; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('grid-cell');
+            fragment.appendChild(cell);
+        }
+        element.appendChild(fragment);
+        // Set styles after appending
         element.style.gridTemplateColumns = `repeat(${width}, ${CELL_SIZE}px)`;
         element.style.gridTemplateRows = `repeat(${height}, ${CELL_SIZE}px)`;
         element.style.width = `${width * CELL_SIZE}px`;
         element.style.height = `${height * CELL_SIZE}px`;
-        for (let i = 0; i < width * height; i++) {
-            const cell = document.createElement('div');
-            cell.classList.add('grid-cell');
-            element.appendChild(cell);
-        }
     }
 
+    // Draws the board state and the current piece onto the DOM grid
     function draw(board, piece, element, isPreview = false) {
         const cells = element.children;
         const gridWidth = isPreview ? NEXT_GRID_SIZE : GRID_WIDTH;
         const gridHeight = isPreview ? NEXT_GRID_SIZE : GRID_HEIGHT;
+        const cellCount = gridWidth * gridHeight;
 
-        // Clear previous state
-        for (let i = 0; i < cells.length; i++) {
-            cells[i].className = 'grid-cell';
-        }
+        // Prepare class names in an array for faster update potentially
+        const classNames = new Array(cellCount).fill('grid-cell');
 
         // Draw the board (locked pieces) - only for main game grids
         if (!isPreview && board) {
             for (let y = 0; y < GRID_HEIGHT; y++) {
                 for (let x = 0; x < GRID_WIDTH; x++) {
-                    if (board[y][x]) {
+                    if (board[y] && board[y][x]) {
                         const index = y * GRID_WIDTH + x;
-                        if (cells[index]) {
-                             cells[index].classList.add(board[y][x]);
+                        if (index < cellCount) { // Check index bounds
+                             classNames[index] = `grid-cell ${board[y][x]}`; // Combine base and color class
                         }
                     }
                 }
@@ -485,13 +558,13 @@
         }
 
         // Draw the current/preview piece
-        if (piece) {
+        if (piece && piece.shape) { // Check piece and shape exist
             const pieceShape = piece.shape;
             const pieceColor = piece.color;
             let pieceX = piece.x;
             let pieceY = piece.y;
 
-             // Adjust position for preview grids if needed (centering logic moved to drawPreviewPiece)
+             // Adjust position for preview grids
              if (isPreview) {
                 const shapeWidth = pieceShape[0].length;
                 const shapeHeight = pieceShape.length;
@@ -502,42 +575,47 @@
             pieceShape.forEach((row, y) => {
                 row.forEach((value, x) => {
                     if (value !== 0) {
-                        const boardX = pieceX + x;
-                        const boardY = pieceY + y;
+                        const drawX = pieceX + x;
+                        const drawY = pieceY + y;
                         // Check bounds for the specific grid being drawn on
-                        if (boardX >= 0 && boardX < gridWidth && boardY >= 0 && boardY < gridHeight) {
-                           const index = boardY * gridWidth + boardX;
-                           if (cells[index]) {
-                                cells[index].classList.add(pieceColor);
-                           }
+                        if (drawX >= 0 && drawX < gridWidth && drawY >= 0 && drawY < gridHeight) {
+                           const index = drawY * gridWidth + drawX;
+                            if (index < cellCount) { // Check index bounds
+                                classNames[index] = `grid-cell ${pieceColor}`; // Overwrite if piece is here
+                            }
                         }
                     }
                 });
             });
         }
+
+        // Apply the class names to the DOM cells
+        for(let i=0; i<cellCount; ++i) {
+            if(cells[i]) { // Check if cell exists
+                cells[i].className = classNames[i];
+            }
+        }
     }
 
     // Specific function to draw preview/hold pieces, handling centering
     function drawPreviewPiece(piece, element) {
-        // Clear the grid first
-        const cells = element.children;
-        for (let i = 0; i < cells.length; i++) {
-           cells[i].className = 'grid-cell';
-        }
-        // Draw the piece, centered (logic is now inside draw function when isPreview is true)
+        // Draw the piece, centered
         draw(null, piece, element, true);
     }
 
 
     // --- Piece Generation (7-Bag System) ---
+
+    // Refills the piece bag if empty
     function refillPieceBag() {
-        pieceBag = [...TETROMINO_KEYS];
+        pieceBag = [...TETROMINO_KEYS]; // Copy all keys
         for (let i = pieceBag.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [pieceBag[i], pieceBag[j]] = [pieceBag[j], pieceBag[i]];
         }
     }
 
+    // Gets the next piece type from the bag
     function getNextPieceType() {
         if (pieceBag.length === 0) {
             refillPieceBag();
@@ -545,44 +623,85 @@
         return pieceBag.pop();
     }
 
+    // Generates a new piece object
     function createPiece(type) {
         const pieceData = TETROMINOES[type];
+        if (!pieceData) {
+            console.error("Invalid piece type requested:", type);
+            type = 'T'; // Default to T if type is invalid
+            pieceData = TETROMINOES[type];
+        }
+        const shape = pieceData.shape;
+        const initialY = (type === 'I') ? -1 : 0; // Spawn I higher
         return {
-            x: Math.floor(GRID_WIDTH / 2) - Math.floor(pieceData.shape[0].length / 2),
-            y: 0, // Start at the top, adjusted down if needed for certain pieces later
-            shape: JSON.parse(JSON.stringify(pieceData.shape)),
+            x: Math.floor(GRID_WIDTH / 2) - Math.floor(shape[0].length / 2),
+            y: initialY,
+            shape: JSON.parse(JSON.stringify(shape)),
             color: pieceData.color
         };
     }
 
+    // Adds pieces to the shared queue if needed
     function ensurePieceQueue() {
-        while (sharedPieceQueue.length < 5) {
+        while (sharedPieceQueue.length < 5) { // Keep a buffer of pieces
             sharedPieceQueue.push(createPiece(getNextPieceType()));
         }
     }
 
+    // Gets the next piece for a player/AI and updates the preview
     function getNextPieceFor(playerOrAI) {
+        // 1. Ensure the queue has enough pieces (including the one to be taken and the next one)
         ensurePieceQueue();
-        const nextPiece = sharedPieceQueue.shift();
-        ensurePieceQueue();
-        const followingPiece = sharedPieceQueue[0];
 
-        if (playerOrAI === 'player') {
-            playerNextPiece = followingPiece;
-            drawPreviewPiece(playerNextPiece, playerNextPieceElement);
-        } else {
-            aiNextPiece = followingPiece;
-            drawPreviewPiece(aiNextPiece, aiNextPieceElement);
+        // 2. Take the piece that will become the CURRENT piece from the front of the queue
+        const currentPiece = sharedPieceQueue.shift();
+        if (!currentPiece) {
+            console.error("Error: Piece queue was empty when getting next piece!");
+            // Attempt recovery - might be needed if ensurePieceQueue fails unexpectedly
+            ensurePieceQueue();
+            return sharedPieceQueue.shift() || createPiece('T'); // Return T as fallback
         }
-        // Reset piece position just in case
-        nextPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(nextPiece.shape[0].length / 2);
-        nextPiece.y = 0;
-        return nextPiece;
+
+
+        // 3. Ensure the queue is refilled AFTER taking the current piece, so the peek is correct
+        ensurePieceQueue();
+
+        // 4. Peek at the NEW front of the queue to see the piece AFTER the current one
+        const followingPiece = sharedPieceQueue[0]; // This is the piece for the preview
+
+        // 5. Update the corresponding preview area
+        if (playerOrAI === 'player') {
+            playerNextPiece = followingPiece; // Store the piece for potential future reference (optional)
+            // Draw the 'followingPiece' in the player's next piece box
+            if (followingPiece) {
+                drawPreviewPiece(followingPiece, playerNextPieceElement);
+            } else {
+                 console.warn("No following piece found for player preview.");
+                 drawPreviewPiece(null, playerNextPieceElement); // Draw empty if queue issue
+            }
+        } else { // 'ai'
+            aiNextPiece = followingPiece;
+             if (followingPiece) {
+                drawPreviewPiece(followingPiece, aiNextPieceElement);
+            } else {
+                 console.warn("No following piece found for AI preview.");
+                 drawPreviewPiece(null, aiNextPieceElement); // Draw empty
+            }
+        }
+
+        // 6. Reset the position of the piece that is becoming the CURRENT piece
+        const shape = currentPiece.shape;
+        currentPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(shape[0].length / 2);
+        currentPiece.y = (currentPiece.color === 'I') ? -1 : 0; // Use color to check for I piece type
+
+        // 7. Return the piece that is now CURRENT
+        return currentPiece;
     }
 
 
     // --- Collision Detection ---
     function isValidMove(piece, board) {
+        if (!piece || !piece.shape) return false; // Guard against null/invalid piece
         const shape = piece.shape;
         const pieceX = piece.x;
         const pieceY = piece.y;
@@ -593,11 +712,15 @@
                     const boardX = pieceX + x;
                     const boardY = pieceY + y;
 
+                    // Check boundaries
                     if (boardX < 0 || boardX >= GRID_WIDTH || boardY >= GRID_HEIGHT) {
-                        return false;
+                        return false; // Out of bounds (allow Y < 0 initially)
                     }
-                    if (boardY >= 0 && board[boardY] && board[boardY][boardX] !== 0) {
-                        return false;
+                    // Check collision with existing blocks (only if within grid height)
+                    if (boardY >= 0) {
+                        if (!board[boardY] || board[boardY][boardX] !== 0) {
+                             return false; // Collision or invalid row access
+                        }
                     }
                 }
             }
@@ -606,8 +729,11 @@
     }
 
     // --- Piece Manipulation ---
+
+    // Rotate the piece matrix clockwise
     function rotateMatrix(matrix) {
         const rows = matrix.length;
+        if (rows === 0) return []; // Handle empty matrix
         const cols = matrix[0].length;
         const rotated = [];
         for (let j = 0; j < cols; j++) {
@@ -619,48 +745,67 @@
         return rotated;
     }
 
+    // Attempt to rotate a piece, handling basic wall kicks
     function rotate(piece, board) {
+        if (!piece) return false;
         const originalShape = JSON.parse(JSON.stringify(piece.shape)); // Deep copy for revert
         const originalX = piece.x;
+        const originalY = piece.y; // Store Y too for potential kicks
         piece.shape = rotateMatrix(piece.shape);
 
-        // Basic wall kick logic
-        let offset = 1;
-        while (!isValidMove(piece, board)) {
-            piece.x += offset; // Try moving right
-            if (isValidMove(piece, board)) break;
-            piece.x -= offset * 2; // Try moving left
-             if (isValidMove(piece, board)) break;
-             piece.x += offset; // Move back to center
+        // Basic wall kick logic (SRS-like kicks could be more complex)
+        const kicks = [
+            [0, 0], // Try initial position
+            [-1, 0], // Try left 1
+            [1, 0], // Try right 1
+            [-2, 0], // Try left 2
+            [2, 0], // Try right 2
+            [0, -1], // Try up 1 (less common but possible)
+        ];
 
-             // More complex kicks could be added here (e.g., move up, check wider offsets)
-             // For now, if simple kicks fail, revert.
-             piece.shape = originalShape;
-             piece.x = originalX;
-             return false; // Indicate rotation failed
+        for (const [dx, dy] of kicks) {
+            piece.x = originalX + dx;
+            piece.y = originalY + dy;
+            if (isValidMove(piece, board)) {
+                return true; // Rotation successful with kick
+            }
         }
-        return true; // Rotation successful
+
+        // Failed rotation, revert
+        piece.x = originalX;
+        piece.y = originalY;
+        piece.shape = originalShape;
+        return false; // Indicate rotation failed
     }
 
+    // Move the piece
     function move(piece, board, dx, dy) {
+        if (!piece) return false; // Guard against null piece
         piece.x += dx;
         piece.y += dy;
         if (!isValidMove(piece, board)) {
+            // Revert move if invalid
             piece.x -= dx;
             piece.y -= dy;
-            return false;
+            return false; // Indicate move failed
         }
-        return true;
+        // Redrawing is handled by the caller (event listener or interval)
+        return true; // Indicate move succeeded
     }
 
+    // Lock the piece onto the board
     function merge(piece, board) {
+        if (!piece || !piece.shape) return; // Guard against null/invalid piece
         piece.shape.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value !== 0) {
                     const boardX = piece.x + x;
                     const boardY = piece.y + y;
+                    // Only merge parts within the visible grid
                     if (boardY >= 0 && boardY < GRID_HEIGHT && boardX >= 0 && boardX < GRID_WIDTH) {
-                        board[boardY][boardX] = piece.color;
+                         if (board[boardY]) { // Ensure row exists
+                             board[boardY][boardX] = piece.color;
+                         }
                     }
                 }
             });
@@ -671,35 +816,42 @@
 
     // --- Hold Piece Logic ---
     function holdPiece() {
-        if (!playerCanHold || isPaused || playerGameOver) return; // Can only hold once per piece lock
+        if (!playerCanHold || isPaused || playerGameOver || !playerPiece) return; // Can only hold once per piece lock
 
         const previouslyHeld = playerHeldPiece; // Store what was in hold (or null)
+        const currentPieceToHold = playerPiece; // Store current piece before replacing
 
-        // Move current piece to hold (reset its state if needed for preview)
-        playerHeldPiece = playerPiece;
-        playerHeldPiece.x = 0; // Reset position for preview drawing
-        playerHeldPiece.y = 0;
+        // Move current piece to hold (reset its state for preview)
+        playerHeldPiece = currentPieceToHold;
+        // Reset position/rotation for consistent preview (optional, depends on desired hold visuals)
+        // playerHeldPiece.x = 0;
+        // playerHeldPiece.y = 0;
         drawPreviewPiece(playerHeldPiece, playerHoldPieceElement); // Update hold display
 
         // Get new piece: either the previously held one or the next from queue
         if (previouslyHeld) {
             playerPiece = previouslyHeld;
             // Reset position for the piece coming from hold
-            playerPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(playerPiece.shape[0].length / 2);
-            playerPiece.y = 0;
+            const shape = playerPiece.shape;
+            playerPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(shape[0].length / 2);
+            playerPiece.y = (playerPiece.color === 'I') ? -1 : 0; // Reset Y based on type
         } else {
             playerPiece = getNextPieceFor('player'); // Get next piece from queue
         }
 
         playerCanHold = false; // Cannot hold again until next piece locks
 
+        // Stop existing movement intervals when holding
+        clearMovementIntervals();
+
         // Check if the new piece causes immediate game over
         if (!isValidMove(playerPiece, playerBoard)) {
-            handleGameOver('player');
+             draw(playerBoard, playerPiece, playerGridElement); // Show the collision
+             handleGameOver('player');
+        } else {
+            // Update player grid display with the new piece
+            draw(playerBoard, playerPiece, playerGridElement);
         }
-
-        // Update player grid display
-        draw(playerBoard, playerPiece, playerGridElement);
     }
 
 
@@ -707,7 +859,7 @@
     function clearLines(board, playerOrAI) {
         let linesClearedCount = 0;
         for (let y = GRID_HEIGHT - 1; y >= 0; y--) {
-            if (board[y].every(cell => cell !== 0)) {
+            if (board[y] && board[y].every(cell => cell !== 0)) { // Check row exists
                 linesClearedCount++;
                 board.splice(y, 1);
                 board.unshift(new Array(GRID_WIDTH).fill(0));
@@ -722,86 +874,159 @@
 
     function updateScoreAndLevel(linesClearedCount, playerOrAI) {
         const points = SCORE_POINTS[linesClearedCount] || 0;
+        let currentLevelRef, currentScoreRef, currentLinesRef, scoreElement, levelElement, linesElement, loopIntervalRef;
+        let needsIntervalUpdate = false;
+        let targetLevel; // Define targetLevel outside the if/else
+
         if (playerOrAI === 'player') {
+            currentLevelRef = playerLevel;
             playerScore += points * playerLevel;
             playerLines += linesClearedCount;
-            playerLevel = Math.floor(playerLines / LINES_PER_LEVEL) + 1;
-            playerScoreElement.textContent = playerScore;
-            playerLevelElement.textContent = playerLevel;
-            playerLinesElement.textContent = playerLines;
-             // Update player interval if level changed
-             clearInterval(playerGameLoopInterval);
-             playerGameLoopInterval = setInterval(playerDrop, getDropInterval(playerLevel));
-        } else {
+            targetLevel = Math.floor(playerLines / LINES_PER_LEVEL) + 1; // Calculate new level
+            if (targetLevel !== playerLevel) {
+                playerLevel = targetLevel;
+                needsIntervalUpdate = true;
+            }
+            scoreElement = playerScoreElement;
+            levelElement = playerLevelElement;
+            linesElement = playerLinesElement;
+            currentScoreRef = playerScore;
+            currentLinesRef = playerLines;
+            loopIntervalRef = playerGameLoopInterval;
+
+        } else { // 'ai'
+            currentLevelRef = aiLevel;
             aiScore += points * aiLevel;
             aiLines += linesClearedCount;
-            aiLevel = Math.floor(aiLines / LINES_PER_LEVEL) + 1;
-            aiScoreElement.textContent = aiScore;
-            aiLevelElement.textContent = aiLevel;
-            aiLinesElement.textContent = aiLines;
-             // Update AI interval if level changed
-             clearInterval(aiGameLoopInterval);
-             aiGameLoopInterval = setInterval(aiStep, getDropInterval(aiLevel));
+             targetLevel = Math.floor(aiLines / LINES_PER_LEVEL) + 1; // Calculate new level
+             if (targetLevel !== aiLevel) {
+                 aiLevel = targetLevel;
+                 needsIntervalUpdate = true;
+             }
+            scoreElement = aiScoreElement;
+            levelElement = aiLevelElement;
+            linesElement = aiLinesElement;
+            currentScoreRef = aiScore;
+            currentLinesRef = aiLines;
+            loopIntervalRef = aiGameLoopInterval;
+        }
+
+        // Update DOM
+        scoreElement.textContent = currentScoreRef;
+        levelElement.textContent = playerOrAI === 'player' ? playerLevel : aiLevel; // Use updated level
+        linesElement.textContent = currentLinesRef;
+
+        // Update game loop interval if level changed and game is running
+        if (needsIntervalUpdate && loopIntervalRef && !isPaused) {
+             const newIntervalTime = getDropInterval(playerOrAI === 'player' ? playerLevel : aiLevel);
+             clearInterval(loopIntervalRef); // Clear existing interval
+             // Start new interval only if game is not over for this entity
+             if (playerOrAI === 'player' && !playerGameOver) {
+                 playerGameLoopInterval = setInterval(playerDrop, newIntervalTime);
+             } else if (playerOrAI === 'ai' && !aiGameOver) {
+                 aiGameLoopInterval = setInterval(aiStep, newIntervalTime);
+             }
         }
     }
 
+    // Calculates the drop interval based on level
     function getDropInterval(level) {
-        return Math.max(100, 1000 - (level - 1) * 60); // Slightly faster progression
+        return Math.max(100, 1000 - (level - 1) * 60); // Faster drop speed per level, min 100ms
     }
 
     // --- Game Loop ---
-    function playerDrop() {
-        if (isPaused || playerGameOver || aiGameOver) return;
+    function playerDrop() { // Handles automatic drop based on level interval
+        if (isPaused || playerGameOver || aiGameOver || isDownDown || !playerPiece) return; // Stop auto-drop if soft-drop key is held or no piece
 
         if (!move(playerPiece, playerBoard, 0, 1)) {
+            // Piece cannot move down, lock it
             merge(playerPiece, playerBoard); // merge now sets playerCanHold = true
             clearLines(playerBoard, 'player');
             playerPiece = getNextPieceFor('player');
 
+            // Check for game over immediately after getting new piece
             if (!isValidMove(playerPiece, playerBoard)) {
+                draw(playerBoard, playerPiece, playerGridElement); // Draw the invalid state briefly
                 handleGameOver('player');
-                return;
+                return; // Stop further execution for player
             }
         }
+        // Redraw after successful automatic drop or if new piece spawned
         draw(playerBoard, playerPiece, playerGridElement);
     }
 
-    function aiStep() {
-        if (isPaused || aiGameOver || playerGameOver) return;
+    function softDropAction() { // Action performed by soft drop interval when ArrowDown is held
+         if (isPaused || playerGameOver || aiGameOver || !playerPiece) return;
+
+         if (!move(playerPiece, playerBoard, 0, 1)) {
+             // Piece landed due to soft drop hold
+             merge(playerPiece, playerBoard);
+             clearLines(playerBoard, 'player');
+             playerPiece = getNextPieceFor('player');
+             if (!isValidMove(playerPiece, playerBoard)) {
+                 draw(playerBoard, playerPiece, playerGridElement); // Draw invalid state
+                 handleGameOver('player');
+             } else {
+                 draw(playerBoard, playerPiece, playerGridElement); // Draw new piece
+             }
+             // Stop soft drop interval once piece locks
+             clearInterval(softDropInterval);
+             softDropInterval = null;
+             isDownDown = false; // Ensure flag is reset if interval stops here
+         } else {
+             // Redraw after successful soft drop move
+             draw(playerBoard, playerPiece, playerGridElement);
+             // Optional: Add minimal score for soft dropping
+             // playerScore += 1; playerScoreElement.textContent = playerScore;
+         }
+    }
+
+
+    function aiStep() { // Handles AI's automatic drop and triggers decision
+         if (isPaused || aiGameOver || playerGameOver || !aiPiece) return;
 
         if (!move(aiPiece, aiBoard, 0, 1)) {
-            merge(aiPiece, aiBoard); // AI doesn't use hold, merge is simpler
+            // Piece cannot move down, lock it
+            merge(aiPiece, aiBoard); // AI doesn't use hold
             clearLines(aiBoard, 'ai');
-            aiPiece = getNextPieceFor('ai');
+            aiPiece = getNextPieceFor('ai'); // Get the next piece for AI
 
+            // Check for AI game over
             if (!isValidMove(aiPiece, aiBoard)) {
-                handleGameOver('ai');
-                return;
+                 draw(aiBoard, aiPiece, aiGridElement); // Draw invalid state
+                 handleGameOver('ai');
+                 return; // Stop further execution for AI
             }
-            clearTimeout(aiDecisionTimeout);
+            // Trigger AI decision for the new piece after a delay
+            clearTimeout(aiDecisionTimeout); // Clear previous timeout if any
             aiDecisionTimeout = setTimeout(aiDecideAndExecuteMove, DIFFICULTIES[currentDifficulty].delay);
         }
+        // Redraw AI board after its automatic drop
         draw(aiBoard, aiPiece, aiGridElement);
     }
 
-    // --- AI Logic (Heuristics remain the same) ---
+    // --- AI Logic ---
+
+    // Evaluate the board state based on heuristics
     function evaluateBoardState(board, weights) {
         let score = 0;
         let aggregateHeight = 0;
         let holes = 0;
         let bumpiness = 0;
-        const heights = new Array(GRID_WIDTH).fill(0);
+        const heights = new Array(GRID_WIDTH).fill(0); // Height of each column
 
+        // Calculate heights and holes
         for (let x = 0; x < GRID_WIDTH; x++) {
             let columnHeight = 0;
             let foundTop = false;
             for (let y = 0; y < GRID_HEIGHT; y++) {
-                if (board[y][x] !== 0) {
+                if (board[y] && board[y][x] !== 0) { // Check row exists
                     if (!foundTop) {
                         columnHeight = GRID_HEIGHT - y;
                         foundTop = true;
                     }
-                } else if (foundTop) {
+                } else if (foundTop && board[y]) { // Check row exists
+                    // Found an empty cell below a filled cell in the same column
                     holes++;
                 }
             }
@@ -809,17 +1034,20 @@
             aggregateHeight += columnHeight;
         }
 
+        // Calculate bumpiness (sum of height differences between adjacent columns)
         for (let x = 0; x < GRID_WIDTH - 1; x++) {
             bumpiness += Math.abs(heights[x] - heights[x + 1]);
         }
 
+        // Calculate potential lines cleared
         let completedLines = 0;
          for (let y = 0; y < GRID_HEIGHT; y++) {
-            if (board[y].every(cell => cell !== 0)) {
+            if (board[y] && board[y].every(cell => cell !== 0)) { // Check row exists
                 completedLines++;
             }
         }
 
+        // Apply weights
         score += aggregateHeight * weights.height;
         score += completedLines * weights.lines;
         score += holes * weights.holes;
@@ -828,107 +1056,112 @@
         return score;
     }
 
+
+    // AI decides and executes the best move for the current aiPiece
     function aiDecideAndExecuteMove() {
          if (isPaused || aiGameOver || playerGameOver || !aiPiece) return;
 
         let bestScore = -Infinity;
-        let bestMove = null;
-        const currentAiPieceShape = aiPiece.shape; // Store initial shape for reset
+        let bestMove = null; // { x: finalX, rotation: count }
+
+        const initialAiPiece = JSON.parse(JSON.stringify(aiPiece)); // Work with a copy
         const weights = DIFFICULTIES[currentDifficulty].weights;
 
-        // Iterate through all 4 rotations
-        let testPiece = JSON.parse(JSON.stringify(aiPiece)); // Work with a copy for rotation
-
+        // Iterate through all possible rotations (0 to 3)
         for (let rotation = 0; rotation < 4; rotation++) {
+            const rotatedPiece = JSON.parse(JSON.stringify(initialAiPiece));
+             for(let r=0; r<rotation; ++r) {
+                 rotatedPiece.shape = rotateMatrix(rotatedPiece.shape);
+             }
+
             // Iterate through all possible horizontal positions for this rotation
             let minX = 0;
-             // Find the leftmost block in the current shape to adjust minX
-             for (let y = 0; y < testPiece.shape.length; y++) {
-                 for (let x = 0; x < testPiece.shape[y].length; x++) {
-                     if (testPiece.shape[y][x]) {
-                         minX = Math.min(minX, -x);
-                         break; // Only need the first block in the row
+            for(let y=0; y<rotatedPiece.shape.length; ++y) {
+                for(let x=0; x<rotatedPiece.shape[y].length; ++x) {
+                    if(rotatedPiece.shape[y][x]) {
+                        minX = Math.min(minX, -x);
+                        break;
+                    }
+                }
+            }
+            let maxX = GRID_WIDTH;
+             for(let y=0; y<rotatedPiece.shape.length; ++y) {
+                 for(let x=rotatedPiece.shape[y].length-1; x>=0; --x) {
+                     if(rotatedPiece.shape[y][x]) {
+                         maxX = Math.min(maxX, GRID_WIDTH - 1 - x);
+                         break;
                      }
                  }
              }
-            let maxX = GRID_WIDTH - testPiece.shape[0].length;
-             // Find the rightmost extent to adjust maxX
-             for (let y = 0; y < testPiece.shape.length; y++) {
-                 for (let x = 0; x < testPiece.shape[y].length; x++) {
-                      if (testPiece.shape[y][x]) {
-                           maxX = Math.max(maxX, GRID_WIDTH - 1 - x);
-                      }
-                 }
-             }
-             // Ensure maxX calculation is correct (it should be the max starting column)
-             maxX = GRID_WIDTH - testPiece.shape[0].length; // This seems more reliable
 
 
             for (let x = minX; x <= maxX; x++) {
-                let simulatedPiece = { ...testPiece, x: x, y: 0 }; // Create piece for simulation at this x, rotation
+                const testPiece = { ...rotatedPiece, x: x, y: initialAiPiece.y }; // Start at initial Y
 
-                 // Simulate dropping the piece straight down
-                 // Need to check validity from y=0 downwards
-                 if (!isValidMove(simulatedPiece, aiBoard)) {
-                      // If it's invalid even at the top for this column/rotation, skip
-                      continue;
-                 }
+                // Check if spawn position itself is valid before simulating drop
+                if (!isValidMove(testPiece, aiBoard)) {
+                    continue; // Skip this column if invalid at spawn
+                }
 
-                 let simulationY = 0;
-                 while (isValidMove({ ...simulatedPiece, y: simulationY + 1 }, aiBoard)) {
-                     simulationY++;
-                 }
-                 simulatedPiece.y = simulationY; // Final resting position Y
+                // Simulate dropping the piece straight down
+                let simulationY = testPiece.y;
+                while (isValidMove({ ...testPiece, y: simulationY + 1 }, aiBoard)) {
+                    simulationY++;
+                }
+                const finalSimulatedPiece = { ...testPiece, y: simulationY };
 
+                // Create a temporary board state after placing the piece
+                const tempBoard = aiBoard.map(row => [...row]);
+                merge(finalSimulatedPiece, tempBoard); // Simulate merging
 
-                 // Create a temporary board state after placing the piece
-                 const tempBoard = aiBoard.map(row => [...row]); // Deep copy board
-                 merge(simulatedPiece, tempBoard); // Simulate merging
+                // Evaluate the resulting board state
+                const score = evaluateBoardState(tempBoard, weights);
 
-                 // Evaluate the resulting board state
-                 const score = evaluateBoardState(tempBoard, weights);
-
-                 // Check if this move is better
-                 if (score > bestScore) {
-                     bestScore = score;
-                     // Store the necessary info to replicate the move
-                     bestMove = { x: simulatedPiece.x, rotation: rotation, finalY: simulatedPiece.y };
-                 }
+                // Check if this move is better
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = { x: finalSimulatedPiece.x, rotation: rotation };
+                }
             }
-             // Rotate the test piece for the next rotation iteration
-             testPiece.shape = rotateMatrix(testPiece.shape);
-             // Ensure x is reset or handled correctly after rotation (position depends on shape)
-             testPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(testPiece.shape[0].length / 2);
         }
 
-        // Execute the best move found
+
+        // Execute the best move found for the *actual* aiPiece
         if (bestMove) {
-             // 1. Rotate the *actual* AI piece to the target rotation
-             aiPiece.shape = currentAiPieceShape; // Reset shape first
-             for (let r = 0; r < bestMove.rotation; r++) {
-                  aiPiece.shape = rotateMatrix(aiPiece.shape);
-             }
-             // Reset position after rotation before moving horizontally
-             aiPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(aiPiece.shape[0].length / 2);
-             aiPiece.y = 0;
+            // 1. Rotate AI piece to target rotation
+            aiPiece.shape = initialAiPiece.shape; // Reset shape
+            for (let r = 0; r < bestMove.rotation; r++) {
+                 aiPiece.shape = rotateMatrix(aiPiece.shape);
+            }
+            // Reset position after rotation
+            aiPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(aiPiece.shape[0].length / 2);
+            aiPiece.y = (aiPiece.color === 'I') ? -1 : 0;
 
 
-             // 2. Move AI piece horizontally to target X
-             // Need to ensure the piece is valid after rotation before moving
-             if (isValidMove(aiPiece, aiBoard)) {
-                 const targetX = bestMove.x;
-                 const dx = Math.sign(targetX - aiPiece.x);
-                 while (aiPiece.x !== targetX) {
-                      if (!move(aiPiece, aiBoard, dx, 0)) break; // Stop if move fails
+            // 2. Move AI piece horizontally to target X
+             if (!isValidMove(aiPiece, aiBoard)) {
+                 aiPiece.y = 0; // Try adjusting Y
+                 if (!isValidMove(aiPiece, aiBoard)) {
+                      console.warn("AI: Move invalid post-rotation even after Y adjust.");
+                      bestMove = null;
                  }
-             } else {
-                 // If rotation made it invalid at spawn, this move is impossible.
-                 // This indicates a flaw in evaluation or simulation. Fallback?
-                 console.warn("AI chose a move that became invalid after rotation.");
-                 // As fallback, just let it drop from current state (will be handled by aiStep)
-                 bestMove = null; // Clear best move to prevent hard drop attempt
              }
 
+             if (bestMove) {
+                 const targetX = bestMove.x;
+                 const currentX = aiPiece.x;
+                 // Move step by step horizontally
+                 if (targetX > currentX) {
+                     for (let i = currentX; i < targetX; i++) {
+                         if (!move(aiPiece, aiBoard, 1, 0)) { bestMove = null; break; }
+                     }
+                 } else if (targetX < currentX) {
+                     for (let i = currentX; i > targetX; i--) {
+                         if (!move(aiPiece, aiBoard, -1, 0)) { bestMove = null; break; }
+                     }
+                 }
+                  if (!bestMove) console.warn("AI: Horizontal move failed during execution.");
+             }
 
             // 3. Hard drop the piece (simulate instant drop) - only if move is still valid
             if(bestMove) {
@@ -946,9 +1179,22 @@
 
 
     // --- Game Control ---
-    function startGame() {
-        if (playerGameLoopInterval || aiGameLoopInterval) return;
 
+    // Clears all movement timers/intervals and resets flags
+    function clearMovementIntervals() {
+        clearTimeout(dasTimeoutLeft); dasTimeoutLeft = null;
+        clearTimeout(dasTimeoutRight); dasTimeoutRight = null;
+        clearInterval(arrIntervalLeft); arrIntervalLeft = null;
+        clearInterval(arrIntervalRight); arrIntervalRight = null;
+        clearInterval(softDropInterval); softDropInterval = null;
+        isLeftDown = false; isRightDown = false; isDownDown = false;
+    }
+
+    function startGame() {
+        if (playerGameLoopInterval || aiGameLoopInterval) return; // Game already running
+        console.log("Starting Game...");
+
+        // Reset game state
         playerBoard = createMatrix(GRID_WIDTH, GRID_HEIGHT);
         aiBoard = createMatrix(GRID_WIDTH, GRID_HEIGHT);
         playerScore = 0; aiScore = 0;
@@ -958,23 +1204,30 @@
         isPaused = false;
         playerHeldPiece = null; // Reset hold
         playerCanHold = true;   // Reset hold ability
-        sharedPieceQueue = [];
-        pieceBag = [];
-        refillPieceBag();
+        sharedPieceQueue = []; // Reset piece queue
+        pieceBag = []; // Reset bag for new game
+        refillPieceBag(); // Fill initial bag
 
-        ensurePieceQueue();
+        // Reset DAS/ARR state
+        clearMovementIntervals();
+
+        // Get initial pieces
+        ensurePieceQueue(); // Ensure queue has pieces
         playerPiece = getNextPieceFor('player');
         aiPiece = getNextPieceFor('ai');
 
+        // Update difficulty display
         currentDifficulty = difficultySelect.value;
         aiDifficultyDisplay.textContent = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
 
+        // Initial draw
         draw(playerBoard, playerPiece, playerGridElement);
         draw(aiBoard, aiPiece, aiGridElement);
         drawPreviewPiece(playerNextPiece, playerNextPieceElement);
         drawPreviewPiece(aiNextPiece, aiNextPieceElement);
         drawPreviewPiece(playerHeldPiece, playerHoldPieceElement); // Draw empty hold initially
 
+        // Update UI Text
         playerScoreElement.textContent = playerScore;
         aiScoreElement.textContent = aiScore;
         playerLevelElement.textContent = playerLevel;
@@ -983,169 +1236,289 @@
         aiLinesElement.textContent = aiLines;
         playerMessageElement.classList.remove('visible');
         aiMessageElement.classList.remove('visible');
+
+        // Update Button States
         pauseButton.textContent = 'Pause';
         pauseButton.disabled = false;
         restartButton.disabled = false;
         startButton.disabled = true;
         difficultySelect.disabled = true;
 
-        const playerInterval = getDropInterval(playerLevel);
-        const aiInterval = getDropInterval(aiLevel);
-        playerGameLoopInterval = setInterval(playerDrop, playerInterval);
-        aiGameLoopInterval = setInterval(aiStep, aiInterval);
 
-        clearTimeout(aiDecisionTimeout);
-        aiDecisionTimeout = setTimeout(aiDecideAndExecuteMove, DIFFICULTIES[currentDifficulty].delay);
+        // Start game loops (Clear existing first just in case)
+        clearInterval(playerGameLoopInterval);
+        clearInterval(aiGameLoopInterval);
+        playerGameLoopInterval = setInterval(playerDrop, getDropInterval(playerLevel));
+        aiGameLoopInterval = setInterval(aiStep, getDropInterval(aiLevel));
+
+        // Initial AI decision trigger
+         clearTimeout(aiDecisionTimeout);
+         aiDecisionTimeout = setTimeout(aiDecideAndExecuteMove, DIFFICULTIES[currentDifficulty].delay);
 
         console.log(`Game started: ${currentDifficulty}`);
     }
 
     function pauseGame() {
-        if (playerGameOver || aiGameOver) return;
+        if (playerGameOver || aiGameOver) return; // Don't pause if game is over
+
         isPaused = !isPaused;
         if (isPaused) {
-            clearInterval(playerGameLoopInterval);
-            clearInterval(aiGameLoopInterval);
+            clearInterval(playerGameLoopInterval); playerGameLoopInterval = null;
+            clearInterval(aiGameLoopInterval); aiGameLoopInterval = null;
             clearTimeout(aiDecisionTimeout);
-            playerGameLoopInterval = null;
-            aiGameLoopInterval = null;
+            clearMovementIntervals(); // Stop movement repeats on pause
             pauseButton.textContent = 'Resume';
             console.log("Game Paused");
         } else {
-            const playerInterval = getDropInterval(playerLevel);
-            const aiInterval = getDropInterval(aiLevel);
-            playerGameLoopInterval = setInterval(playerDrop, playerInterval);
-            aiGameLoopInterval = setInterval(aiStep, aiInterval);
-            // Resume AI decision making if it was pending when paused
-            aiDecisionTimeout = setTimeout(aiDecideAndExecuteMove, DIFFICULTIES[currentDifficulty].delay);
+            // Resume game loops (only if game not over)
+            if(!playerGameOver) playerGameLoopInterval = setInterval(playerDrop, getDropInterval(playerLevel));
+            if(!aiGameOver) aiGameLoopInterval = setInterval(aiStep, getDropInterval(aiLevel));
+            // Resume AI decision making
+            if(!aiGameOver) aiDecisionTimeout = setTimeout(aiDecideAndExecuteMove, DIFFICULTIES[currentDifficulty].delay);
             pauseButton.textContent = 'Pause';
             console.log("Game Resumed");
         }
     }
 
     function restartGame() {
-        clearInterval(playerGameLoopInterval);
-        clearInterval(aiGameLoopInterval);
+        // Clear intervals & state
+        clearInterval(playerGameLoopInterval); playerGameLoopInterval = null;
+        clearInterval(aiGameLoopInterval); aiGameLoopInterval = null;
         clearTimeout(aiDecisionTimeout);
-        playerGameLoopInterval = null;
-        aiGameLoopInterval = null;
-        aiDecisionTimeout = null;
+        clearMovementIntervals(); // Clear movement state on restart
 
-        startButton.disabled = false;
-        pauseButton.disabled = true;
-        pauseButton.textContent = 'Pause';
-        restartButton.disabled = true;
-        difficultySelect.disabled = false;
-        playerMessageElement.classList.remove('visible');
-        aiMessageElement.classList.remove('visible');
+        // Reset game state variables fully (needed before clearing UI)
+        playerGameOver = false; aiGameOver = false; isPaused = false;
+        playerScore = 0; aiScore = 0; playerLevel = 1; aiLevel = 1; playerLines = 0; aiLines = 0;
+        playerHeldPiece = null; playerCanHold = true;
+        playerPiece = null; aiPiece = null; // Clear current pieces
+        sharedPieceQueue = []; pieceBag = []; // Clear queues
 
-        console.log("Game Reset");
-        createDOMGrid(playerGridElement, GRID_WIDTH, GRID_HEIGHT);
-        createDOMGrid(aiGridElement, GRID_WIDTH, GRID_HEIGHT);
-        createDOMGrid(playerNextPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
-        createDOMGrid(aiNextPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
-        createDOMGrid(playerHoldPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE); // Clear hold grid too
+        // Reset UI
+         startButton.disabled = false;
+         pauseButton.disabled = true;
+         pauseButton.textContent = 'Pause';
+         restartButton.disabled = true;
+         difficultySelect.disabled = false;
+         playerMessageElement.classList.remove('visible');
+         aiMessageElement.classList.remove('visible');
+
+         // Clear grids and info displays
+         createDOMGrid(playerGridElement, GRID_WIDTH, GRID_HEIGHT);
+         createDOMGrid(aiGridElement, GRID_WIDTH, GRID_HEIGHT);
+         createDOMGrid(playerNextPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
+         createDOMGrid(aiNextPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
+         createDOMGrid(playerHoldPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
          playerScoreElement.textContent = 0;
          aiScoreElement.textContent = 0;
          playerLevelElement.textContent = 1;
          aiLevelElement.textContent = 1;
          playerLinesElement.textContent = 0;
          aiLinesElement.textContent = 0;
+
+        console.log("Game Reset");
+        // Don't automatically start, wait for Start button press
     }
 
-    function handleGameOver(loser) {
-        clearInterval(playerGameLoopInterval);
-        clearInterval(aiGameLoopInterval);
-        clearTimeout(aiDecisionTimeout);
-        playerGameLoopInterval = null;
-        aiGameLoopInterval = null;
-        aiDecisionTimeout = null;
-        pauseButton.disabled = true;
+     function handleGameOver(loser) {
+         // Stop game loops & movement
+         clearInterval(playerGameLoopInterval); playerGameLoopInterval = null;
+         clearInterval(aiGameLoopInterval); aiGameLoopInterval = null;
+         clearTimeout(aiDecisionTimeout);
+         clearMovementIntervals();
 
-        if (loser === 'player') {
-            playerGameOver = true;
-            playerMessageElement.textContent = 'Game Over!';
-            playerMessageElement.classList.add('visible');
-            if (!aiGameOver) {
-                aiMessageElement.textContent = 'AI Wins!';
-                aiMessageElement.classList.add('visible');
-            }
-            console.log("Player Game Over");
-        } else {
-            aiGameOver = true;
-            aiMessageElement.textContent = 'AI Lost!';
-            aiMessageElement.classList.add('visible');
-            if (!playerGameOver) {
-                playerMessageElement.textContent = 'You Win!';
-                playerMessageElement.classList.add('visible');
-            }
-            console.log("AI Game Over");
-        }
-    }
+         pauseButton.disabled = true; // Disable pause after game over
+         // Keep restart enabled
+
+         if (loser === 'player') {
+             playerGameOver = true;
+             playerMessageElement.textContent = 'Game Over!';
+             playerMessageElement.classList.add('visible');
+             // Check if AI also lost simultaneously (rare)
+             if (!aiGameOver) {
+                 aiMessageElement.textContent = 'AI Wins!';
+                 aiMessageElement.classList.add('visible');
+             }
+             console.log("Player Game Over");
+         } else { // AI lost
+             aiGameOver = true;
+             aiMessageElement.textContent = 'AI Lost!';
+             aiMessageElement.classList.add('visible');
+              // Check if player also lost simultaneously
+             if (!playerGameOver) {
+                 playerMessageElement.textContent = 'You Win!';
+                 playerMessageElement.classList.add('visible');
+             }
+             console.log("AI Game Over");
+         }
+     }
 
     // --- Event Listeners ---
     document.addEventListener('keydown', (event) => {
-        if (isPaused || playerGameOver || !playerPiece) return;
-
-        // Allow hold even if game over? No, handled by playerGameOver check.
-        if (event.key === 'c' || event.key === 'C') {
-             holdPiece();
-             return; // Don't process other keys if hold was pressed
+        // Allow pause/restart even if game over? Maybe not pause. Restart is fine.
+        if (isPaused) {
+             // Allow unpausing via button only? Or add key? For now, button only.
+             return;
         }
+        if (playerGameOver && aiGameOver) return; // If both lost, no input needed
 
-        // Other controls only if not game over
-        if (playerGameOver) return;
+        // --- Fix Scroll Issue & Handle Input ---
+        const relevantKeys = ['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' ', 'x', 'X', 'c', 'C'];
+        if (relevantKeys.includes(event.key)) {
+            event.preventDefault(); // Prevent browser scroll/action
+
+             // Ignore player controls if player game is over
+             if (playerGameOver) return;
+             if (!playerPiece) return; // Ignore if no piece active
+
+            switch (event.key) {
+                case 'c':
+                case 'C':
+                    holdPiece();
+                    break;
+
+                case 'ArrowLeft':
+                    if (!isLeftDown) { // First press
+                        isLeftDown = true;
+                        if (move(playerPiece, playerBoard, -1, 0)) { // Initial move
+                            draw(playerBoard, playerPiece, playerGridElement);
+                        }
+                        // Start DAS timer
+                        clearTimeout(dasTimeoutLeft); // Clear any previous stray timer
+                        dasTimeoutLeft = setTimeout(() => {
+                            if (isLeftDown) { // Check if still held down
+                                clearInterval(arrIntervalLeft); // Clear previous interval
+                                // Start ARR interval
+                                arrIntervalLeft = setInterval(() => {
+                                    if (move(playerPiece, playerBoard, -1, 0)) {
+                                        draw(playerBoard, playerPiece, playerGridElement);
+                                    } else {
+                                        // Stop ARR if move fails (hit wall)
+                                        clearInterval(arrIntervalLeft); arrIntervalLeft = null;
+                                    }
+                                }, ARR_INTERVAL);
+                            }
+                        }, DAS_DELAY);
+                    }
+                    break;
+
+                case 'ArrowRight':
+                     if (!isRightDown) { // First press
+                        isRightDown = true;
+                        if (move(playerPiece, playerBoard, 1, 0)) { // Initial move
+                             draw(playerBoard, playerPiece, playerGridElement);
+                        }
+                        // Start DAS timer
+                        clearTimeout(dasTimeoutRight);
+                        dasTimeoutRight = setTimeout(() => {
+                            if (isRightDown) { // Check if still held down
+                                clearInterval(arrIntervalRight);
+                                // Start ARR interval
+                                arrIntervalRight = setInterval(() => {
+                                     if (move(playerPiece, playerBoard, 1, 0)) {
+                                         draw(playerBoard, playerPiece, playerGridElement);
+                                     } else {
+                                         // Stop ARR if move fails
+                                         clearInterval(arrIntervalRight); arrIntervalRight = null;
+                                     }
+                                }, ARR_INTERVAL);
+                            }
+                        }, DAS_DELAY);
+                    }
+                    break;
+
+                case 'ArrowDown':
+                     if (!isDownDown) { // First press
+                        isDownDown = true;
+                        softDropAction(); // Initial soft drop action
+                        // Start soft drop interval immediately
+                        clearInterval(softDropInterval); // Clear previous just in case
+                        softDropInterval = setInterval(softDropAction, SOFT_DROP_INTERVAL);
+                     }
+                    break;
+
+                case 'ArrowUp':
+                case 'x':
+                case 'X':
+                    if (rotate(playerPiece, playerBoard)) {
+                        draw(playerBoard, playerPiece, playerGridElement); // Redraw after successful rotation
+                    }
+                    break;
+
+                case ' ': // Space bar
+                     while (move(playerPiece, playerBoard, 0, 1)) { /* Hard drop */ }
+                     // Piece has hit bottom, trigger lock/clear/next piece sequence
+                      merge(playerPiece, playerBoard);
+                      clearLines(playerBoard, 'player');
+                      playerPiece = getNextPieceFor('player');
+                      if (!isValidMove(playerPiece, playerBoard)) {
+                          draw(playerBoard, playerPiece, playerGridElement); // Show collision
+                          handleGameOver('player');
+                      } else {
+                          draw(playerBoard, playerPiece, playerGridElement); // Draw new piece
+                      }
+                     // Stop any ongoing soft drop interval if space is pressed
+                     clearInterval(softDropInterval); softDropInterval = null; isDownDown = false;
+                    break;
+            }
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        // No need to check isPaused or gameOver here, just reset flags/timers
 
         switch (event.key) {
             case 'ArrowLeft':
-                move(playerPiece, playerBoard, -1, 0);
+                isLeftDown = false;
+                clearTimeout(dasTimeoutLeft); dasTimeoutLeft = null;
+                clearInterval(arrIntervalLeft); arrIntervalLeft = null;
                 break;
             case 'ArrowRight':
-                move(playerPiece, playerBoard, 1, 0);
+                 isRightDown = false;
+                 clearTimeout(dasTimeoutRight); dasTimeoutRight = null;
+                 clearInterval(arrIntervalRight); arrIntervalRight = null;
                 break;
             case 'ArrowDown':
-                playerDrop(); // Soft drop moves down and checks lock
-                break;
-            case 'ArrowUp':
-            case 'x':
-            case 'X':
-                rotate(playerPiece, playerBoard);
-                break;
-            case ' ': // Space bar
-                 while (move(playerPiece, playerBoard, 0, 1)) { /* Hard drop */ }
-                 playerDrop(); // Trigger lock/clear/next
+                 isDownDown = false;
+                 clearInterval(softDropInterval); softDropInterval = null;
                 break;
         }
-         // Re-draw after any valid move/rotate action
-         draw(playerBoard, playerPiece, playerGridElement);
     });
 
-    startButton.addEventListener('click', startGame);
-    pauseButton.addEventListener('click', pauseGame);
-    restartButton.addEventListener('click', restartGame);
-    difficultySelect.addEventListener('change', (e) => {
-        if (!playerGameLoopInterval) {
-            currentDifficulty = e.target.value;
-             aiDifficultyDisplay.textContent = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
-             console.log(`Difficulty set to: ${currentDifficulty}`);
-        }
-    });
 
     // --- Initialization ---
     function init() {
-        console.log("Initializing Pork Tetris...");
+        console.log("Initializing Pork Tetris (v2 - Fixed)...");
+
+        // Create initial grids
         createDOMGrid(playerGridElement, GRID_WIDTH, GRID_HEIGHT);
         createDOMGrid(aiGridElement, GRID_WIDTH, GRID_HEIGHT);
         createDOMGrid(playerNextPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
         createDOMGrid(aiNextPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
         createDOMGrid(playerHoldPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE); // Init hold grid
 
+        // Set initial difficulty display
         currentDifficulty = difficultySelect.value;
         aiDifficultyDisplay.textContent = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
 
-        console.log("Ready to start.");
+        // Add button listeners
+        startButton.addEventListener('click', startGame);
+        pauseButton.addEventListener('click', pauseGame);
+        restartButton.addEventListener('click', restartGame);
+        difficultySelect.addEventListener('change', (e) => {
+            // Update difficulty only if game hasn't started
+            if (!playerGameLoopInterval && !aiGameLoopInterval) {
+                currentDifficulty = e.target.value;
+                 aiDifficultyDisplay.textContent = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
+                 console.log(`Difficulty set to: ${currentDifficulty}`);
+            }
+        });
+
+
+        console.log("Ready to start Pork Tetris.");
     }
 
+    // Initialize the game when the DOM is ready
     document.addEventListener('DOMContentLoaded', init);
 
 </script>
