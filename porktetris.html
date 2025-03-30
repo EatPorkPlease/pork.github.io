@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pork Tetris</title>
+    <style>
+        /* Dark Futuristic Blue Theme */
+        :root {
+            --bg-color: #0a192f; /* Dark Navy */
+            --container-bg: #172a45; /* Slightly Lighter Navy */
+            --controls-bg: #0f213a;
+            --grid-bg: #071a2f;
+            --grid-border: #64ffda; /* Neon Cyan/Teal */
+            --cell-border: #1d3b61; /* Darker Blue for empty cell lines */
+            --text-color: #ccd6f6; /* Light Blue/Grey */
+            --header-color: #64ffda; /* Neon Cyan/Teal */
+            --button-bg: #64ffda;
+            --button-text: #0a192f;
+            --button-hover-bg: #52d9c1;
+            --disabled-bg: #4a6a97;
+            --info-text: #8892b0; /* Lighter Grey */
+            --preview-bg: #172a45;
+            --preview-border: #64ffda;
+            --overlay-bg: rgba(10, 25, 47, 0.85); /* Darker overlay */
+            --overlay-text: #64ffda;
+
+            /* Tetromino Colors (Adjusted slightly for dark theme if needed) */
+            --color-I: #00ffff; /* Cyan */
+            --color-O: #ffff00; /* Yellow */
+            --color-T: #ae00ff; /* Purple */
+            --color-S: #00ff00; /* Lime */
+            --color-Z: #ff0000; /* Red */
+            --color-J: #0077ff; /* Blue */
+            --color-L: #ffaa00; /* Orange */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-top: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            background-color: var(--container-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            flex-wrap: wrap;
+            justify-content: center;
+            border: 1px solid var(--cell-border);
+        }
+
+        .player-area, .ai-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 220px;
+        }
+
+        .controls-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background-color: var(--controls-bg);
+            border-radius: 10px;
+            min-width: 160px;
+            height: fit-content;
+            border: 1px solid var(--cell-border);
+        }
+
+        h1, h2 {
+            color: var(--header-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        h1 {
+             font-size: 2.5em; /* Larger main title */
+             text-shadow: 0 0 5px var(--header-color);
+        }
+         h2 {
+             font-size: 1.5em;
+         }
+         h3 {
+             color: var(--header-color);
+             font-size: 1.1em;
+             margin-bottom: 5px;
+         }
+
+        .grid-container {
+            position: relative;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 22px); /* Slightly larger cells */
+            grid-template-rows: repeat(20, 22px);
+            border: 3px solid var(--grid-border);
+            background-color: var(--grid-bg);
+            position: relative;
+            width: 220px; /* 10 * 22px */
+            height: 440px; /* 20 * 22px */
+            overflow: hidden;
+            border-radius: 5px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .grid-cell {
+            width: 22px;
+            height: 22px;
+            border: 1px solid var(--cell-border);
+            box-sizing: border-box;
+        }
+
+        /* Tetromino Colors using CSS Variables */
+        .grid-cell.I { background-color: var(--color-I); border-color: color-mix(in srgb, var(--color-I) 70%, black); }
+        .grid-cell.O { background-color: var(--color-O); border-color: color-mix(in srgb, var(--color-O) 70%, black); }
+        .grid-cell.T { background-color: var(--color-T); border-color: color-mix(in srgb, var(--color-T) 70%, black); }
+        .grid-cell.S { background-color: var(--color-S); border-color: color-mix(in srgb, var(--color-S) 70%, black); }
+        .grid-cell.Z { background-color: var(--color-Z); border-color: color-mix(in srgb, var(--color-Z) 70%, black); }
+        .grid-cell.J { background-color: var(--color-J); border-color: color-mix(in srgb, var(--color-J) 70%, black); }
+        .grid-cell.L { background-color: var(--color-L); border-color: color-mix(in srgb, var(--color-L) 70%, black); }
+
+        /* Add subtle brightness/shadow to filled cells */
+        .grid-cell:not([class='grid-cell']) { /* Selects cells with a color class */
+             box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.2), inset 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+
+        .info-area {
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .info-area p {
+            margin: 6px 0;
+            font-size: 1.1em;
+            color: var(--info-text);
+        }
+        .info-area p span {
+            color: var(--text-color);
+            font-weight: bold;
+        }
+
+        .preview-hold-container {
+             display: flex;
+             justify-content: space-around; /* Space out Next and Hold */
+             width: 100%;
+             margin-top: 10px;
+        }
+         .preview-box, .hold-box {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+         }
+
+
+        .next-piece-area, .hold-piece-area {
+            margin-top: 5px;
+            width: 88px; /* 4 * 22px */
+            height: 88px; /* 4 * 22px */
+            display: grid;
+            grid-template-columns: repeat(4, 22px);
+            grid-template-rows: repeat(4, 22px);
+            background-color: var(--preview-bg);
+            border: 2px solid var(--preview-border);
+            border-radius: 4px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.4);
+        }
+
+        .next-piece-area .grid-cell, .hold-piece-area .grid-cell {
+             border: 1px solid var(--cell-border);
+             width: 22px;
+             height: 22px;
+        }
+
+        .controls-area button {
+            padding: 12px 18px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            width: 130px; /* Uniform button width */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .controls-area button:hover:not(:disabled) {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-1px);
+             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+         .controls-area button:active:not(:disabled) {
+             transform: translateY(0px);
+         }
+
+        .controls-area button:disabled {
+            background-color: var(--disabled-bg);
+            color: #a0b0c5;
+            cursor: not-allowed;
+             box-shadow: none;
+        }
+
+        .difficulty-select label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--header-color);
+             font-weight: bold;
+        }
+
+        .difficulty-select select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--preview-border);
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            width: 130px;
+            font-size: 1em;
+        }
+         .difficulty-select select:focus {
+             outline: none;
+             box-shadow: 0 0 5px var(--preview-border);
+         }
+
+        .message-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--overlay-bg);
+            color: var(--overlay-text);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            text-align: center;
+            z-index: 10;
+            border-radius: inherit;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+            text-shadow: 0 0 8px var(--overlay-text);
+        }
+
+        .message-overlay.visible {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        .controls-info {
+             font-size: 0.85em;
+             text-align: center;
+             margin-top: 10px;
+             color: var(--info-text);
+             line-height: 1.4;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 25px;
+                padding: 15px;
+            }
+            .controls-area {
+                order: -1;
+                width: 95%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+             .player-area, .ai-area {
+                width: 95%;
+            }
+            h1 { font-size: 2em; }
+            h2 { font-size: 1.3em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>Pork Tetris</h1>
+
+    <div class="controls-area">
+        <h2>Controls</h2>
+        <div class="difficulty-select">
+            <label for="difficulty">Difficulty:</label>
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="intermediate" selected>Intermediate</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
+        <button id="startButton">Start Game</button>
+        <button id="pauseButton" disabled>Pause</button>
+        <button id="restartButton" disabled>Restart</button>
+        <div class="controls-info">
+            Arrows: Move/Drop<br>
+            Up/X: Rotate<br>
+            Space: Hard Drop<br>
+            C: Hold Piece
+        </div>
+    </div>
+
+    <div class="player-area">
+        <h2>Player</h2>
+        <div class="grid-container">
+            <div id="player-grid" class="grid"></div>
+            <div id="player-message" class="message-overlay">Game Over!</div>
+        </div>
+        <div class="info-area">
+            <p>Score: <span id="player-score">0</span></p>
+            <p>Level: <span id="player-level">1</span></p>
+            <p>Lines: <span id="player-lines">0</span></p>
+            <div class="preview-hold-container">
+                <div class="hold-box">
+                    <h3>Hold (C)</h3>
+                    <div id="player-hold-piece" class="hold-piece-area"></div>
+                </div>
+                 <div class="preview-box">
+                    <h3>Next</h3>
+                    <div id="player-next-piece" class="next-piece-area"></div>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ai-area">
+        <h2>AI (<span id="ai-difficulty-display">Intermediate</span>)</h2>
+         <div class="grid-container">
+            <div id="ai-grid" class="grid"></div>
+            <div id="ai-message" class="message-overlay">AI Lost!</div>
+        </div>
+        <div class="info-area">
+            <p>Score: <span id="ai-score">0</span></p>
+            <p>Level: <span id="ai-level">1</span></p>
+            <p>Lines: <span id="ai-lines">0</span></p>
+             <div class="preview-hold-container">
+                 <div class="preview-box">
+                     <h3>Next</h3>
+                    <div id="ai-next-piece" class="next-piece-area"></div>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Constants ---
+    const GRID_WIDTH = 10;
+    const GRID_HEIGHT = 20;
+    const NEXT_GRID_SIZE = 4; // For the next/hold piece preview area
+    const CELL_SIZE = 22; // Match CSS
+
+    // Tetromino shapes and colors
+    const TETROMINOES = {
+        'I': { shape: [[1, 1, 1, 1]], color: 'I' },
+        'O': { shape: [[1, 1], [1, 1]], color: 'O' },
+        'T': { shape: [[0, 1, 0], [1, 1, 1]], color: 'T' },
+        'S': { shape: [[0, 1, 1], [1, 1, 0]], color: 'S' },
+        'Z': { shape: [[1, 1, 0], [0, 1, 1]], color: 'Z' },
+        'J': { shape: [[1, 0, 0], [1, 1, 1]], color: 'J' },
+        'L': { shape: [[0, 0, 1], [1, 1, 1]], color: 'L' }
+    };
+    const TETROMINO_KEYS = Object.keys(TETROMINOES);
+
+    // Scoring
+    const SCORE_POINTS = { 1: 100, 2: 300, 3: 500, 4: 800 };
+    const LINES_PER_LEVEL = 10;
+
+    // Difficulty settings
+    const DIFFICULTIES = {
+        easy: { delay: 500, weights: { height: -1, lines: 3, holes: -4, bumpiness: -0.5 } },
+        intermediate: { delay: 200, weights: { height: -1.5, lines: 4, holes: -6, bumpiness: -1 } },
+        hard: { delay: 50, weights: { height: -2, lines: 5, holes: -8, bumpiness: -1.5 } }
+    };
+
+    // --- Game State Variables ---
+    let playerBoard, aiBoard;
+    let playerPiece, aiPiece;
+    let playerNextPiece, aiNextPiece;
+    let playerHeldPiece = null; // Added for Hold feature
+    let playerCanHold = true;  // Added for Hold feature
+    let playerScore, aiScore;
+    let playerLevel, aiLevel;
+    let playerLines, aiLines;
+    let playerGameOver, aiGameOver;
+    let isPaused;
+    let playerGameLoopInterval, aiGameLoopInterval, aiDecisionTimeout;
+    let currentDifficulty = 'intermediate';
+    let pieceBag = [];
+    let sharedPieceQueue = [];
+
+    // --- DOM Elements ---
+    const playerGridElement = document.getElementById('player-grid');
+    const aiGridElement = document.getElementById('ai-grid');
+    const playerNextPieceElement = document.getElementById('player-next-piece');
+    const aiNextPieceElement = document.getElementById('ai-next-piece');
+    const playerHoldPieceElement = document.getElementById('player-hold-piece'); // Added
+    const playerScoreElement = document.getElementById('player-score');
+    const aiScoreElement = document.getElementById('ai-score');
+    const playerLevelElement = document.getElementById('player-level');
+    const aiLevelElement = document.getElementById('ai-level');
+    const playerLinesElement = document.getElementById('player-lines');
+    const aiLinesElement = document.getElementById('ai-lines');
+    const startButton = document.getElementById('startButton');
+    const pauseButton = document.getElementById('pauseButton');
+    const restartButton = document.getElementById('restartButton');
+    const difficultySelect = document.getElementById('difficulty');
+    const aiDifficultyDisplay = document.getElementById('ai-difficulty-display');
+    const playerMessageElement = document.getElementById('player-message');
+    const aiMessageElement = document.getElementById('ai-message');
+
+    // --- Utility Functions ---
+
+    function createMatrix(width, height) {
+        const matrix = [];
+        while (height--) {
+            matrix.push(new Array(width).fill(0));
+        }
+        return matrix;
+    }
+
+    function createDOMGrid(element, width, height) {
+        element.innerHTML = '';
+        element.style.gridTemplateColumns = `repeat(${width}, ${CELL_SIZE}px)`;
+        element.style.gridTemplateRows = `repeat(${height}, ${CELL_SIZE}px)`;
+        element.style.width = `${width * CELL_SIZE}px`;
+        element.style.height = `${height * CELL_SIZE}px`;
+        for (let i = 0; i < width * height; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('grid-cell');
+            element.appendChild(cell);
+        }
+    }
+
+    function draw(board, piece, element, isPreview = false) {
+        const cells = element.children;
+        const gridWidth = isPreview ? NEXT_GRID_SIZE : GRID_WIDTH;
+        const gridHeight = isPreview ? NEXT_GRID_SIZE : GRID_HEIGHT;
+
+        // Clear previous state
+        for (let i = 0; i < cells.length; i++) {
+            cells[i].className = 'grid-cell';
+        }
+
+        // Draw the board (locked pieces) - only for main game grids
+        if (!isPreview && board) {
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    if (board[y][x]) {
+                        const index = y * GRID_WIDTH + x;
+                        if (cells[index]) {
+                             cells[index].classList.add(board[y][x]);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Draw the current/preview piece
+        if (piece) {
+            const pieceShape = piece.shape;
+            const pieceColor = piece.color;
+            let pieceX = piece.x;
+            let pieceY = piece.y;
+
+             // Adjust position for preview grids if needed (centering logic moved to drawPreviewPiece)
+             if (isPreview) {
+                const shapeWidth = pieceShape[0].length;
+                const shapeHeight = pieceShape.length;
+                pieceX = Math.floor((NEXT_GRID_SIZE - shapeWidth) / 2);
+                pieceY = Math.floor((NEXT_GRID_SIZE - shapeHeight) / 2);
+             }
+
+            pieceShape.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value !== 0) {
+                        const boardX = pieceX + x;
+                        const boardY = pieceY + y;
+                        // Check bounds for the specific grid being drawn on
+                        if (boardX >= 0 && boardX < gridWidth && boardY >= 0 && boardY < gridHeight) {
+                           const index = boardY * gridWidth + boardX;
+                           if (cells[index]) {
+                                cells[index].classList.add(pieceColor);
+                           }
+                        }
+                    }
+                });
+            });
+        }
+    }
+
+    // Specific function to draw preview/hold pieces, handling centering
+    function drawPreviewPiece(piece, element) {
+        // Clear the grid first
+        const cells = element.children;
+        for (let i = 0; i < cells.length; i++) {
+           cells[i].className = 'grid-cell';
+        }
+        // Draw the piece, centered (logic is now inside draw function when isPreview is true)
+        draw(null, piece, element, true);
+    }
+
+
+    // --- Piece Generation (7-Bag System) ---
+    function refillPieceBag() {
+        pieceBag = [...TETROMINO_KEYS];
+        for (let i = pieceBag.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pieceBag[i], pieceBag[j]] = [pieceBag[j], pieceBag[i]];
+        }
+    }
+
+    function getNextPieceType() {
+        if (pieceBag.length === 0) {
+            refillPieceBag();
+        }
+        return pieceBag.pop();
+    }
+
+    function createPiece(type) {
+        const pieceData = TETROMINOES[type];
+        return {
+            x: Math.floor(GRID_WIDTH / 2) - Math.floor(pieceData.shape[0].length / 2),
+            y: 0, // Start at the top, adjusted down if needed for certain pieces later
+            shape: JSON.parse(JSON.stringify(pieceData.shape)),
+            color: pieceData.color
+        };
+    }
+
+    function ensurePieceQueue() {
+        while (sharedPieceQueue.length < 5) {
+            sharedPieceQueue.push(createPiece(getNextPieceType()));
+        }
+    }
+
+    function getNextPieceFor(playerOrAI) {
+        ensurePieceQueue();
+        const nextPiece = sharedPieceQueue.shift();
+        ensurePieceQueue();
+        const followingPiece = sharedPieceQueue[0];
+
+        if (playerOrAI === 'player') {
+            playerNextPiece = followingPiece;
+            drawPreviewPiece(playerNextPiece, playerNextPieceElement);
+        } else {
+            aiNextPiece = followingPiece;
+            drawPreviewPiece(aiNextPiece, aiNextPieceElement);
+        }
+        // Reset piece position just in case
+        nextPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(nextPiece.shape[0].length / 2);
+        nextPiece.y = 0;
+        return nextPiece;
+    }
+
+
+    // --- Collision Detection ---
+    function isValidMove(piece, board) {
+        const shape = piece.shape;
+        const pieceX = piece.x;
+        const pieceY = piece.y;
+
+        for (let y = 0; y < shape.length; y++) {
+            for (let x = 0; x < shape[y].length; x++) {
+                if (shape[y][x] !== 0) {
+                    const boardX = pieceX + x;
+                    const boardY = pieceY + y;
+
+                    if (boardX < 0 || boardX >= GRID_WIDTH || boardY >= GRID_HEIGHT) {
+                        return false;
+                    }
+                    if (boardY >= 0 && board[boardY] && board[boardY][boardX] !== 0) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    // --- Piece Manipulation ---
+    function rotateMatrix(matrix) {
+        const rows = matrix.length;
+        const cols = matrix[0].length;
+        const rotated = [];
+        for (let j = 0; j < cols; j++) {
+            rotated[j] = new Array(rows);
+            for (let i = 0; i < rows; i++) {
+                rotated[j][i] = matrix[rows - 1 - i][j];
+            }
+        }
+        return rotated;
+    }
+
+    function rotate(piece, board) {
+        const originalShape = JSON.parse(JSON.stringify(piece.shape)); // Deep copy for revert
+        const originalX = piece.x;
+        piece.shape = rotateMatrix(piece.shape);
+
+        // Basic wall kick logic
+        let offset = 1;
+        while (!isValidMove(piece, board)) {
+            piece.x += offset; // Try moving right
+            if (isValidMove(piece, board)) break;
+            piece.x -= offset * 2; // Try moving left
+             if (isValidMove(piece, board)) break;
+             piece.x += offset; // Move back to center
+
+             // More complex kicks could be added here (e.g., move up, check wider offsets)
+             // For now, if simple kicks fail, revert.
+             piece.shape = originalShape;
+             piece.x = originalX;
+             return false; // Indicate rotation failed
+        }
+        return true; // Rotation successful
+    }
+
+    function move(piece, board, dx, dy) {
+        piece.x += dx;
+        piece.y += dy;
+        if (!isValidMove(piece, board)) {
+            piece.x -= dx;
+            piece.y -= dy;
+            return false;
+        }
+        return true;
+    }
+
+    function merge(piece, board) {
+        piece.shape.forEach((row, y) => {
+            row.forEach((value, x) => {
+                if (value !== 0) {
+                    const boardX = piece.x + x;
+                    const boardY = piece.y + y;
+                    if (boardY >= 0 && boardY < GRID_HEIGHT && boardX >= 0 && boardX < GRID_WIDTH) {
+                        board[boardY][boardX] = piece.color;
+                    }
+                }
+            });
+        });
+        // IMPORTANT: Allow holding again after a piece locks
+        playerCanHold = true;
+    }
+
+    // --- Hold Piece Logic ---
+    function holdPiece() {
+        if (!playerCanHold || isPaused || playerGameOver) return; // Can only hold once per piece lock
+
+        const previouslyHeld = playerHeldPiece; // Store what was in hold (or null)
+
+        // Move current piece to hold (reset its state if needed for preview)
+        playerHeldPiece = playerPiece;
+        playerHeldPiece.x = 0; // Reset position for preview drawing
+        playerHeldPiece.y = 0;
+        drawPreviewPiece(playerHeldPiece, playerHoldPieceElement); // Update hold display
+
+        // Get new piece: either the previously held one or the next from queue
+        if (previouslyHeld) {
+            playerPiece = previouslyHeld;
+            // Reset position for the piece coming from hold
+            playerPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(playerPiece.shape[0].length / 2);
+            playerPiece.y = 0;
+        } else {
+            playerPiece = getNextPieceFor('player'); // Get next piece from queue
+        }
+
+        playerCanHold = false; // Cannot hold again until next piece locks
+
+        // Check if the new piece causes immediate game over
+        if (!isValidMove(playerPiece, playerBoard)) {
+            handleGameOver('player');
+        }
+
+        // Update player grid display
+        draw(playerBoard, playerPiece, playerGridElement);
+    }
+
+
+    // --- Line Clearing and Scoring ---
+    function clearLines(board, playerOrAI) {
+        let linesClearedCount = 0;
+        for (let y = GRID_HEIGHT - 1; y >= 0; y--) {
+            if (board[y].every(cell => cell !== 0)) {
+                linesClearedCount++;
+                board.splice(y, 1);
+                board.unshift(new Array(GRID_WIDTH).fill(0));
+                y++;
+            }
+        }
+        if (linesClearedCount > 0) {
+            updateScoreAndLevel(linesClearedCount, playerOrAI);
+        }
+        return linesClearedCount;
+    }
+
+    function updateScoreAndLevel(linesClearedCount, playerOrAI) {
+        const points = SCORE_POINTS[linesClearedCount] || 0;
+        if (playerOrAI === 'player') {
+            playerScore += points * playerLevel;
+            playerLines += linesClearedCount;
+            playerLevel = Math.floor(playerLines / LINES_PER_LEVEL) + 1;
+            playerScoreElement.textContent = playerScore;
+            playerLevelElement.textContent = playerLevel;
+            playerLinesElement.textContent = playerLines;
+             // Update player interval if level changed
+             clearInterval(playerGameLoopInterval);
+             playerGameLoopInterval = setInterval(playerDrop, getDropInterval(playerLevel));
+        } else {
+            aiScore += points * aiLevel;
+            aiLines += linesClearedCount;
+            aiLevel = Math.floor(aiLines / LINES_PER_LEVEL) + 1;
+            aiScoreElement.textContent = aiScore;
+            aiLevelElement.textContent = aiLevel;
+            aiLinesElement.textContent = aiLines;
+             // Update AI interval if level changed
+             clearInterval(aiGameLoopInterval);
+             aiGameLoopInterval = setInterval(aiStep, getDropInterval(aiLevel));
+        }
+    }
+
+    function getDropInterval(level) {
+        return Math.max(100, 1000 - (level - 1) * 60); // Slightly faster progression
+    }
+
+    // --- Game Loop ---
+    function playerDrop() {
+        if (isPaused || playerGameOver || aiGameOver) return;
+
+        if (!move(playerPiece, playerBoard, 0, 1)) {
+            merge(playerPiece, playerBoard); // merge now sets playerCanHold = true
+            clearLines(playerBoard, 'player');
+            playerPiece = getNextPieceFor('player');
+
+            if (!isValidMove(playerPiece, playerBoard)) {
+                handleGameOver('player');
+                return;
+            }
+        }
+        draw(playerBoard, playerPiece, playerGridElement);
+    }
+
+    function aiStep() {
+        if (isPaused || aiGameOver || playerGameOver) return;
+
+        if (!move(aiPiece, aiBoard, 0, 1)) {
+            merge(aiPiece, aiBoard); // AI doesn't use hold, merge is simpler
+            clearLines(aiBoard, 'ai');
+            aiPiece = getNextPieceFor('ai');
+
+            if (!isValidMove(aiPiece, aiBoard)) {
+                handleGameOver('ai');
+                return;
+            }
+            clearTimeout(aiDecisionTimeout);
+            aiDecisionTimeout = setTimeout(aiDecideAndExecuteMove, DIFFICULTIES[currentDifficulty].delay);
+        }
+        draw(aiBoard, aiPiece, aiGridElement);
+    }
+
+    // --- AI Logic (Heuristics remain the same) ---
+    function evaluateBoardState(board, weights) {
+        let score = 0;
+        let aggregateHeight = 0;
+        let holes = 0;
+        let bumpiness = 0;
+        const heights = new Array(GRID_WIDTH).fill(0);
+
+        for (let x = 0; x < GRID_WIDTH; x++) {
+            let columnHeight = 0;
+            let foundTop = false;
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                if (board[y][x] !== 0) {
+                    if (!foundTop) {
+                        columnHeight = GRID_HEIGHT - y;
+                        foundTop = true;
+                    }
+                } else if (foundTop) {
+                    holes++;
+                }
+            }
+            heights[x] = columnHeight;
+            aggregateHeight += columnHeight;
+        }
+
+        for (let x = 0; x < GRID_WIDTH - 1; x++) {
+            bumpiness += Math.abs(heights[x] - heights[x + 1]);
+        }
+
+        let completedLines = 0;
+         for (let y = 0; y < GRID_HEIGHT; y++) {
+            if (board[y].every(cell => cell !== 0)) {
+                completedLines++;
+            }
+        }
+
+        score += aggregateHeight * weights.height;
+        score += completedLines * weights.lines;
+        score += holes * weights.holes;
+        score += bumpiness * weights.bumpiness;
+
+        return score;
+    }
+
+    function aiDecideAndExecuteMove() {
+         if (isPaused || aiGameOver || playerGameOver || !aiPiece) return;
+
+        let bestScore = -Infinity;
+        let bestMove = null;
+        const currentAiPieceShape = aiPiece.shape; // Store initial shape for reset
+        const weights = DIFFICULTIES[currentDifficulty].weights;
+
+        // Iterate through all 4 rotations
+        let testPiece = JSON.parse(JSON.stringify(aiPiece)); // Work with a copy for rotation
+
+        for (let rotation = 0; rotation < 4; rotation++) {
+            // Iterate through all possible horizontal positions for this rotation
+            let minX = 0;
+             // Find the leftmost block in the current shape to adjust minX
+             for (let y = 0; y < testPiece.shape.length; y++) {
+                 for (let x = 0; x < testPiece.shape[y].length; x++) {
+                     if (testPiece.shape[y][x]) {
+                         minX = Math.min(minX, -x);
+                         break; // Only need the first block in the row
+                     }
+                 }
+             }
+            let maxX = GRID_WIDTH - testPiece.shape[0].length;
+             // Find the rightmost extent to adjust maxX
+             for (let y = 0; y < testPiece.shape.length; y++) {
+                 for (let x = 0; x < testPiece.shape[y].length; x++) {
+                      if (testPiece.shape[y][x]) {
+                           maxX = Math.max(maxX, GRID_WIDTH - 1 - x);
+                      }
+                 }
+             }
+             // Ensure maxX calculation is correct (it should be the max starting column)
+             maxX = GRID_WIDTH - testPiece.shape[0].length; // This seems more reliable
+
+
+            for (let x = minX; x <= maxX; x++) {
+                let simulatedPiece = { ...testPiece, x: x, y: 0 }; // Create piece for simulation at this x, rotation
+
+                 // Simulate dropping the piece straight down
+                 // Need to check validity from y=0 downwards
+                 if (!isValidMove(simulatedPiece, aiBoard)) {
+                      // If it's invalid even at the top for this column/rotation, skip
+                      continue;
+                 }
+
+                 let simulationY = 0;
+                 while (isValidMove({ ...simulatedPiece, y: simulationY + 1 }, aiBoard)) {
+                     simulationY++;
+                 }
+                 simulatedPiece.y = simulationY; // Final resting position Y
+
+
+                 // Create a temporary board state after placing the piece
+                 const tempBoard = aiBoard.map(row => [...row]); // Deep copy board
+                 merge(simulatedPiece, tempBoard); // Simulate merging
+
+                 // Evaluate the resulting board state
+                 const score = evaluateBoardState(tempBoard, weights);
+
+                 // Check if this move is better
+                 if (score > bestScore) {
+                     bestScore = score;
+                     // Store the necessary info to replicate the move
+                     bestMove = { x: simulatedPiece.x, rotation: rotation, finalY: simulatedPiece.y };
+                 }
+            }
+             // Rotate the test piece for the next rotation iteration
+             testPiece.shape = rotateMatrix(testPiece.shape);
+             // Ensure x is reset or handled correctly after rotation (position depends on shape)
+             testPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(testPiece.shape[0].length / 2);
+        }
+
+        // Execute the best move found
+        if (bestMove) {
+             // 1. Rotate the *actual* AI piece to the target rotation
+             aiPiece.shape = currentAiPieceShape; // Reset shape first
+             for (let r = 0; r < bestMove.rotation; r++) {
+                  aiPiece.shape = rotateMatrix(aiPiece.shape);
+             }
+             // Reset position after rotation before moving horizontally
+             aiPiece.x = Math.floor(GRID_WIDTH / 2) - Math.floor(aiPiece.shape[0].length / 2);
+             aiPiece.y = 0;
+
+
+             // 2. Move AI piece horizontally to target X
+             // Need to ensure the piece is valid after rotation before moving
+             if (isValidMove(aiPiece, aiBoard)) {
+                 const targetX = bestMove.x;
+                 const dx = Math.sign(targetX - aiPiece.x);
+                 while (aiPiece.x !== targetX) {
+                      if (!move(aiPiece, aiBoard, dx, 0)) break; // Stop if move fails
+                 }
+             } else {
+                 // If rotation made it invalid at spawn, this move is impossible.
+                 // This indicates a flaw in evaluation or simulation. Fallback?
+                 console.warn("AI chose a move that became invalid after rotation.");
+                 // As fallback, just let it drop from current state (will be handled by aiStep)
+                 bestMove = null; // Clear best move to prevent hard drop attempt
+             }
+
+
+            // 3. Hard drop the piece (simulate instant drop) - only if move is still valid
+            if(bestMove) {
+                 while (move(aiPiece, aiBoard, 0, 1)) { /* Keep moving down */ }
+            }
+
+            // Force an immediate redraw after AI move for visual feedback
+             draw(aiBoard, aiPiece, aiGridElement);
+             // aiStep loop will handle locking/next piece.
+        } else {
+             console.warn("AI couldn't find a valid move.");
+             // Let aiStep handle the natural drop.
+        }
+    }
+
+
+    // --- Game Control ---
+    function startGame() {
+        if (playerGameLoopInterval || aiGameLoopInterval) return;
+
+        playerBoard = createMatrix(GRID_WIDTH, GRID_HEIGHT);
+        aiBoard = createMatrix(GRID_WIDTH, GRID_HEIGHT);
+        playerScore = 0; aiScore = 0;
+        playerLevel = 1; aiLevel = 1;
+        playerLines = 0; aiLines = 0;
+        playerGameOver = false; aiGameOver = false;
+        isPaused = false;
+        playerHeldPiece = null; // Reset hold
+        playerCanHold = true;   // Reset hold ability
+        sharedPieceQueue = [];
+        pieceBag = [];
+        refillPieceBag();
+
+        ensurePieceQueue();
+        playerPiece = getNextPieceFor('player');
+        aiPiece = getNextPieceFor('ai');
+
+        currentDifficulty = difficultySelect.value;
+        aiDifficultyDisplay.textContent = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
+
+        draw(playerBoard, playerPiece, playerGridElement);
+        draw(aiBoard, aiPiece, aiGridElement);
+        drawPreviewPiece(playerNextPiece, playerNextPieceElement);
+        drawPreviewPiece(aiNextPiece, aiNextPieceElement);
+        drawPreviewPiece(playerHeldPiece, playerHoldPieceElement); // Draw empty hold initially
+
+        playerScoreElement.textContent = playerScore;
+        aiScoreElement.textContent = aiScore;
+        playerLevelElement.textContent = playerLevel;
+        aiLevelElement.textContent = aiLevel;
+        playerLinesElement.textContent = playerLines;
+        aiLinesElement.textContent = aiLines;
+        playerMessageElement.classList.remove('visible');
+        aiMessageElement.classList.remove('visible');
+        pauseButton.textContent = 'Pause';
+        pauseButton.disabled = false;
+        restartButton.disabled = false;
+        startButton.disabled = true;
+        difficultySelect.disabled = true;
+
+        const playerInterval = getDropInterval(playerLevel);
+        const aiInterval = getDropInterval(aiLevel);
+        playerGameLoopInterval = setInterval(playerDrop, playerInterval);
+        aiGameLoopInterval = setInterval(aiStep, aiInterval);
+
+        clearTimeout(aiDecisionTimeout);
+        aiDecisionTimeout = setTimeout(aiDecideAndExecuteMove, DIFFICULTIES[currentDifficulty].delay);
+
+        console.log(`Game started: ${currentDifficulty}`);
+    }
+
+    function pauseGame() {
+        if (playerGameOver || aiGameOver) return;
+        isPaused = !isPaused;
+        if (isPaused) {
+            clearInterval(playerGameLoopInterval);
+            clearInterval(aiGameLoopInterval);
+            clearTimeout(aiDecisionTimeout);
+            playerGameLoopInterval = null;
+            aiGameLoopInterval = null;
+            pauseButton.textContent = 'Resume';
+            console.log("Game Paused");
+        } else {
+            const playerInterval = getDropInterval(playerLevel);
+            const aiInterval = getDropInterval(aiLevel);
+            playerGameLoopInterval = setInterval(playerDrop, playerInterval);
+            aiGameLoopInterval = setInterval(aiStep, aiInterval);
+            // Resume AI decision making if it was pending when paused
+            aiDecisionTimeout = setTimeout(aiDecideAndExecuteMove, DIFFICULTIES[currentDifficulty].delay);
+            pauseButton.textContent = 'Pause';
+            console.log("Game Resumed");
+        }
+    }
+
+    function restartGame() {
+        clearInterval(playerGameLoopInterval);
+        clearInterval(aiGameLoopInterval);
+        clearTimeout(aiDecisionTimeout);
+        playerGameLoopInterval = null;
+        aiGameLoopInterval = null;
+        aiDecisionTimeout = null;
+
+        startButton.disabled = false;
+        pauseButton.disabled = true;
+        pauseButton.textContent = 'Pause';
+        restartButton.disabled = true;
+        difficultySelect.disabled = false;
+        playerMessageElement.classList.remove('visible');
+        aiMessageElement.classList.remove('visible');
+
+        console.log("Game Reset");
+        createDOMGrid(playerGridElement, GRID_WIDTH, GRID_HEIGHT);
+        createDOMGrid(aiGridElement, GRID_WIDTH, GRID_HEIGHT);
+        createDOMGrid(playerNextPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
+        createDOMGrid(aiNextPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
+        createDOMGrid(playerHoldPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE); // Clear hold grid too
+         playerScoreElement.textContent = 0;
+         aiScoreElement.textContent = 0;
+         playerLevelElement.textContent = 1;
+         aiLevelElement.textContent = 1;
+         playerLinesElement.textContent = 0;
+         aiLinesElement.textContent = 0;
+    }
+
+    function handleGameOver(loser) {
+        clearInterval(playerGameLoopInterval);
+        clearInterval(aiGameLoopInterval);
+        clearTimeout(aiDecisionTimeout);
+        playerGameLoopInterval = null;
+        aiGameLoopInterval = null;
+        aiDecisionTimeout = null;
+        pauseButton.disabled = true;
+
+        if (loser === 'player') {
+            playerGameOver = true;
+            playerMessageElement.textContent = 'Game Over!';
+            playerMessageElement.classList.add('visible');
+            if (!aiGameOver) {
+                aiMessageElement.textContent = 'AI Wins!';
+                aiMessageElement.classList.add('visible');
+            }
+            console.log("Player Game Over");
+        } else {
+            aiGameOver = true;
+            aiMessageElement.textContent = 'AI Lost!';
+            aiMessageElement.classList.add('visible');
+            if (!playerGameOver) {
+                playerMessageElement.textContent = 'You Win!';
+                playerMessageElement.classList.add('visible');
+            }
+            console.log("AI Game Over");
+        }
+    }
+
+    // --- Event Listeners ---
+    document.addEventListener('keydown', (event) => {
+        if (isPaused || playerGameOver || !playerPiece) return;
+
+        // Allow hold even if game over? No, handled by playerGameOver check.
+        if (event.key === 'c' || event.key === 'C') {
+             holdPiece();
+             return; // Don't process other keys if hold was pressed
+        }
+
+        // Other controls only if not game over
+        if (playerGameOver) return;
+
+        switch (event.key) {
+            case 'ArrowLeft':
+                move(playerPiece, playerBoard, -1, 0);
+                break;
+            case 'ArrowRight':
+                move(playerPiece, playerBoard, 1, 0);
+                break;
+            case 'ArrowDown':
+                playerDrop(); // Soft drop moves down and checks lock
+                break;
+            case 'ArrowUp':
+            case 'x':
+            case 'X':
+                rotate(playerPiece, playerBoard);
+                break;
+            case ' ': // Space bar
+                 while (move(playerPiece, playerBoard, 0, 1)) { /* Hard drop */ }
+                 playerDrop(); // Trigger lock/clear/next
+                break;
+        }
+         // Re-draw after any valid move/rotate action
+         draw(playerBoard, playerPiece, playerGridElement);
+    });
+
+    startButton.addEventListener('click', startGame);
+    pauseButton.addEventListener('click', pauseGame);
+    restartButton.addEventListener('click', restartGame);
+    difficultySelect.addEventListener('change', (e) => {
+        if (!playerGameLoopInterval) {
+            currentDifficulty = e.target.value;
+             aiDifficultyDisplay.textContent = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
+             console.log(`Difficulty set to: ${currentDifficulty}`);
+        }
+    });
+
+    // --- Initialization ---
+    function init() {
+        console.log("Initializing Pork Tetris...");
+        createDOMGrid(playerGridElement, GRID_WIDTH, GRID_HEIGHT);
+        createDOMGrid(aiGridElement, GRID_WIDTH, GRID_HEIGHT);
+        createDOMGrid(playerNextPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
+        createDOMGrid(aiNextPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE);
+        createDOMGrid(playerHoldPieceElement, NEXT_GRID_SIZE, NEXT_GRID_SIZE); // Init hold grid
+
+        currentDifficulty = difficultySelect.value;
+        aiDifficultyDisplay.textContent = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
+
+        console.log("Ready to start.");
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+
+</script>
+
+</body>
+</html>
